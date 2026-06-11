@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Predictor Mundial 2026 - Dinámico con Resultados Reales</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);color:#e0e0e0;min-height:100vh;padding:20px}
+.container{max-width:1400px;margin:0 auto}
+h1{text-align:center;color:#e94560;font-size:2.2em;margin-bottom:8px;text-shadow:0 0 20px rgba(233,69,96,.3)}
+.subtitle{text-align:center;color:#a0a0a0;margin-bottom:20px;font-size:1em}
+.tabs{display:flex;justify-content:center;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.tab-btn{padding:10px 18px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#e0e0e0;cursor:pointer;border-radius:8px;font-size:13px;transition:all .3s}
+.tab-btn:hover,.tab-btn.active{background:#e94560;border-color:#e94560;transform:translateY(-2px)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;margin-bottom:15px;backdrop-filter:blur(10px)}
+.card h2{color:#e94560;margin-bottom:12px;font-size:1.2em}
+.card h3{color:#4ecca3;margin-bottom:10px;font-size:1.05em}
+.match-card{background:rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;transition:all .3s}
+.match-card:hover{background:rgba(255,255,255,.12);transform:translateX(3px)}
+.match-info{display:flex;align-items:center;gap:12px;flex:1;flex-wrap:wrap}
+.team-name{font-weight:bold;font-size:1em;min-width:100px}
+.team-home{color:#4ecca3}
+.team-away{color:#f9a825}
+.vs{color:#888;font-weight:bold}
+.match-date{color:#888;font-size:.85em}
+.match-group{background:#e94560;color:white;padding:3px 8px;border-radius:15px;font-size:.75em;font-weight:bold}
+.predict-btn{background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;color:white;padding:7px 16px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px;transition:all .3s}
+.predict-btn:hover{transform:scale(1.05);box-shadow:0 0 12px rgba(233,69,96,.4)}
+.result-input{width:45px;padding:6px;text-align:center;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#e0e0e0;border-radius:5px;font-size:16px;font-weight:bold}
+.save-result-btn{background:#4ecca3;border:none;color:#0f3460;padding:6px 14px;border-radius:5px;cursor:pointer;font-weight:bold;font-size:12px}
+.save-result-btn:hover{background:#3dbb94}
+.prediction-result{background:rgba(78,204,163,.1);border:1px solid rgba(78,204,163,.3);border-radius:8px;padding:12px;margin-top:8px;display:none}
+.prediction-result.show{display:block}
+.prob-bar{height:22px;background:rgba(255,255,255,.1);border-radius:11px;overflow:hidden;margin:4px 0;position:relative}
+.prob-fill{height:100%;border-radius:11px;transition:width 1s ease;display:flex;align-items:center;justify-content:center;color:white;font-weight:bold;font-size:.8em}
+.prob-home{background:linear-gradient(90deg,#4ecca3,#2ecc71)}
+.prob-draw{background:linear-gradient(90deg,#f9a825,#ff9800)}
+.prob-away{background:linear-gradient(90deg,#e94560,#ff4757)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.team-stat-card{background:rgba(255,255,255,.05);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,.1)}
+.team-stat-card h3{color:#e94560;margin-bottom:8px;font-size:1em}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.9em}
+.stat-label{color:#888}
+.stat-value{font-weight:bold;color:#4ecca3}
+.stat-value.away{color:#f9a825}
+.group-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.9em}
+.group-table th{background:rgba(233,69,96,.3);padding:8px;text-align:left;font-size:.8em}
+.group-table td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.05)}
+.group-table tr:hover{background:rgba(255,255,255,.05)}
+.simulation-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:15px}
+.sim-input{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#e0e0e0;padding:8px 12px;border-radius:6px;font-size:13px}
+.sim-btn{background:linear-gradient(135deg,#4ecca3,#2ecc71);border:none;color:white;padding:8px 20px;border-radius:6px;cursor:pointer;font-weight:bold;font-size:13px}
+.sim-btn:hover{transform:scale(1.02)}
+.bet-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px}
+.bet-form input,.bet-form select{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#e0e0e0;padding:8px;border-radius:6px;font-size:13px}
+.bet-form input::placeholder{color:#888}
+.save-bet-btn{background:#e94560;border:none;color:white;padding:10px 20px;border-radius:6px;cursor:pointer;font-weight:bold;grid-column:1/-1}
+.save-bet-btn:hover{background:#d63d56}
+.history-table{width:100%;border-collapse:collapse;font-size:.9em}
+.history-table th{background:rgba(233,69,96,.3);padding:10px;text-align:left}
+.history-table td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05)}
+.hit{color:#4ecca3;font-weight:bold}
+.miss{color:#e94560;font-weight:bold}
+.profit{color:#4ecca3}
+.loss{color:#e94560}
+.bankroll-display{font-size:1.8em;text-align:center;color:#4ecca3;margin:15px 0}
+.score-pred{font-size:1.3em;text-align:center;margin:8px 0;font-weight:bold}
+.score-home{color:#4ecca3}
+.score-away{color:#f9a825}
+.alert-box{background:rgba(233,69,96,.2);border:1px solid #e94560;border-radius:8px;padding:12px;margin-bottom:15px;font-size:.9em}
+.success-box{background:rgba(78,204,163,.2);border:1px solid #4ecca3;border-radius:8px;padding:12px;margin-bottom:15px;font-size:.9em}
+.result-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.9em}
+.result-row span{min-width:80px}
+.result-row .score{font-weight:bold;color:#4ecca3;font-size:1.1em}
+.result-row .vs-small{color:#888}
+.delete-btn{background:rgba(233,69,96,.3);border:none;color:#e94560;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:11px;margin-left:auto}
+.delete-btn:hover{background:rgba(233,69,96,.5)}
+.xg-badge{background:rgba(78,204,163,.2);color:#4ecca3;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:bold}
+.xga-badge{background:rgba(249,168,37,.2);color:#f9a825;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:bold}
+.wc-badge{background:rgba(233,69,96,.2);color:#e94560;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:bold}
+.updated{color:#4ecca3;font-size:.8em;margin-left:8px}
+.formula-box{background:rgba(255,255,255,.03);border-left:3px solid #e94560;padding:10px 15px;margin:10px 0;font-size:.85em;color:#aaa}
+@media(max-width:768px){h1{font-size:1.6em}.match-card{flex-direction:column;align-items:flex-start}.match-info{width:100%;justify-content:space-between}}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🏆 Predictor Mundial 2026</h1>
+<p class="subtitle">Dinámico: ingresa resultados reales → recalcula xG → predice siguientes partidos</p>
+<div class="tabs">
+<button class="tab-btn active" onclick="showTab('partidos')">📅 Partidos</button>
+<button class="tab-btn" onclick="showTab('resultados')">✏️ Ingresar Resultados</button>
+<button class="tab-btn" onclick="showTab('grupos')">📊 Grupos</button>
+<button class="tab-btn" onclick="showTab('simulador')">🎲 Simulador</button>
+<button class="tab-btn" onclick="showTab('estadisticas')">📈 xG Actualizado</button>
+<button class="tab-btn" onclick="showTab('apuestas')">💰 Apuestas</button>
+<button class="tab-btn" onclick="showTab('bracket')">🏆 Bracket</button>
+</div>
+
+<div id="partidos" class="tab-content active">
+<div class="card">
+<h2>🎯 Fase de Grupos</h2>
+<div id="matches-container"></div>
+</div>
+</div>
+
+<div id="resultados" class="tab-content">
+<div class="card">
+<h2>✏️ Ingresar Resultados del Mundial</h2>
+<div class="success-box" id="result-msg" style="display:none"></div>
+<div class="formula-box">
+<strong>Fórmula V2 aplicada a resultados del Mundial:</strong><br>
+factor = 1.0 + (100 - rival_ranking) / 200<br>
+xG = GF_ajustado × 0.85 | xGA = GC_ajustado × 0.85<br>
+<em>Los nuevos resultados se mezclan con los 4 partidos históricos para recalcular promedios.</em>
+</div>
+<p style="color:#888;margin-bottom:12px;font-size:.9em">Ingresa los marcadores reales. El sistema recalculará automáticamente los xG/xGA de cada equipo.</p>
+<div id="pending-matches"></div>
+</div>
+<div class="card">
+<h2>📜 Resultados Ingresados <span class="updated" id="results-count"></span></h2>
+<div id="entered-results"></div>
+</div>
+<div class="card">
+<h2>🔄 Recálculo Manual</h2>
+<p style="color:#888;margin-bottom:10px;font-size:.9em">Los xG se recalculan automáticamente al ingresar un resultado. Puedes forzar el recálculo aquí.</p>
+<button class="sim-btn" onclick="forceRecalculate()">🔄 Recalcular Todos los xG</button>
+<div id="recalc-msg"></div>
+</div>
+</div>
+
+<div id="grupos" class="tab-content">
+<div class="card">
+<h2>📊 Tablas de Grupos (con Resultados Reales)</h2>
+<div class="simulation-controls">
+<button class="sim-btn" onclick="simularTodosGrupos()">🎲 Simular Resto del Grupo</button>
+<button class="sim-btn" onclick="resetGrupos()" style="background:linear-gradient(135deg,#e94560,#ff4757)">🔄 Reset</button>
+</div>
+<div id="groups-container"></div>
+</div>
+</div>
+
+<div id="simulador" class="tab-content">
+<div class="card">
+<h2>🎲 Simulador de Partido (con xG Actualizado)</h2>
+<div class="simulation-controls">
+<select id="sim-local" class="sim-input"></select>
+<span style="font-size:1.1em">VS</span>
+<select id="sim-visitante" class="sim-input"></select>
+<input type="number" id="sim-count" class="sim-input" value="1000" min="100" max="10000" step="100">
+<button class="sim-btn" onclick="simularPartido()">▶ Simular</button>
+</div>
+<div id="sim-result"></div>
+</div>
+<div class="card">
+<h2>🏆 Simulador del Torneo Completo</h2>
+<div class="simulation-controls">
+<input type="number" id="tournament-sims" class="sim-input" value="100" min="10" max="1000">
+<button class="sim-btn" onclick="simularTorneo()">▶ Simular Torneo</button>
+</div>
+<div id="tournament-result"></div>
+</div>
+</div>
+
+<div id="estadisticas" class="tab-content">
+<div class="card">
+<h2>📈 xG Actualizado por Equipo <span class="updated" id="stats-updated"></span></h2>
+<p style="color:#888;margin-bottom:12px;font-size:.9em">xG calculado con: <strong>últimos 4 partidos previos + resultados reales del Mundial</strong></p>
+<div id="stats-container" class="stats-grid"></div>
+</div>
+</div>
+
+<div id="apuestas" class="tab-content">
+<div class="card">
+<h2>💰 Bankroll</h2>
+<div class="bankroll-display" id="bankroll">$1000.00</div>
+<div class="simulation-controls">
+<input type="number" id="bankroll-input" class="sim-input" value="1000" placeholder="Bankroll inicial">
+<button class="sim-btn" onclick="setBankroll()">💵 Establecer</button>
+</div>
+</div>
+<div class="card">
+<h2>📝 Registrar Apuesta</h2>
+<div class="bet-form">
+<input type="date" id="bet-date" class="sim-input">
+<select id="bet-match" class="sim-input"></select>
+<select id="bet-pick" class="sim-input">
+<option value="">Seleccionar pick...</option>
+<option value="1">Local (1)</option>
+<option value="X">Empate (X)</option>
+<option value="2">Visitante (2)</option>
+<option value="Over 2.5">Over 2.5</option>
+<option value="Under 2.5">Under 2.5</option>
+<option value="BTTS Si">BTTS Si</option>
+<option value="BTTS No">BTTS No</option>
+</select>
+<input type="number" id="bet-odds" class="sim-input" step="0.01" placeholder="Cuota">
+<input type="number" id="bet-stake" class="sim-input" step="0.01" placeholder="Stake ($)">
+<select id="bet-result" class="sim-input">
+<option value="">Resultado...</option>
+<option value="pending">Pendiente</option>
+<option value="hit">✅ Acertado</option>
+<option value="miss">❌ Fallado</option>
+</select>
+<button class="save-bet-btn" onclick="saveBet()">💾 Guardar Apuesta</button>
+</div>
+</div>
+<div class="card">
+<h2>📜 Historial de Apuestas</h2>
+<div style="overflow-x:auto">
+<table class="history-table">
+<thead><tr><th>Fecha</th><th>Partido</th><th>Pick</th><th>Cuota</th><th>Stake</th><th>Resultado</th><th>P/L</th></tr></thead>
+<tbody id="history-body"></tbody>
+</table>
+</div>
+<div style="margin-top:12px;text-align:center">
+<button class="sim-btn" onclick="exportHistory()">📥 Exportar CSV</button>
+<button class="sim-btn" onclick="clearHistory()" style="background:linear-gradient(135deg,#e94560,#ff4757)">🗑️ Limpiar</button>
+</div>
+</div>
+</div>
+
+<!-- TAB BRACKET -->
+<div id="bracket" class="tab-content">
+<div class="card">
+<h2>🏆 Bracket del Mundial 2026</h2>
+<p style="color:#888;margin-bottom:15px;font-size:.9em">Visualiza el avance del torneo. Los equipos clasificados se actualizarán según los resultados ingresados.</p>
+<div style="text-align:center;margin-bottom:20px;">
+    <img id="bracket-image" src="images/bracket.png" 
+         alt="Bracket Mundial 2026" 
+         onerror="this.style.display='none';document.getElementById('bracket-fallback').style.display='block';"
+         style="max-width:100%;border-radius:12px;border:2px solid rgba(233,69,96,.3);">
+    <div id="bracket-fallback" style="display:none;background:rgba(255,255,255,.05);padding:40px;border-radius:12px;border:2px dashed rgba(233,69,96,.3);">
+        <p style="color:#e94560;font-size:1.2em;margin-bottom:10px;">🏆 BRACKET MUNDIAL 2026</p>
+        <p style="color:#888;font-size:.9em;">Para ver la imagen del bracket:</p>
+        <ol style="color:#aaa;text-align:left;display:inline-block;margin-top:10px;font-size:.85em;">
+            <li>Sube tu imagen a una carpeta <code>images/</code> en tu repo</li>
+            <li>Nómbrala <code>bracket.png</code></li>
+            <li>Recarga la página</li>
+        </ol>
+        <p style="color:#666;font-size:.8em;margin-top:15px;">O usa una URL externa cambiando el <code>src</code> en el código</p>
+    </div>
+</div>
+<div id="bracket-standings">
+    <h3 style="color:#e94560;margin-bottom:10px;">📊 Clasificados por Grupo (resultados reales)</h3>
+    <div id="bracket-groups-summary"></div>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+const HISTORICAL_MATCHES = [
+    { equipo: 'Argentina', condicion: 'Local', rival: 'Venezuela', rival_ranking: 55, gf: 3, gc: 0 },
+    { equipo: 'Argentina', condicion: 'Local', rival: 'Brasil', rival_ranking: 5, gf: 4, gc: 1 },
+    { equipo: 'Argentina', condicion: 'Visitante', rival: 'Uruguay', rival_ranking: 11, gf: 1, gc: 0 },
+    { equipo: 'Argentina', condicion: 'Visitante', rival: 'Colombia', rival_ranking: 12, gf: 1, gc: 2 },
+    { equipo: 'Brasil', condicion: 'Local', rival: 'Chile', rival_ranking: 40, gf: 2, gc: 0 },
+    { equipo: 'Brasil', condicion: 'Local', rival: 'Perú', rival_ranking: 35, gf: 3, gc: 1 },
+    { equipo: 'Brasil', condicion: 'Visitante', rival: 'Argentina', rival_ranking: 1, gf: 1, gc: 4 },
+    { equipo: 'Brasil', condicion: 'Visitante', rival: 'Colombia', rival_ranking: 12, gf: 2, gc: 2 },
+    { equipo: 'Uruguay', condicion: 'Local', rival: 'Paraguay', rival_ranking: 45, gf: 2, gc: 0 },
+    { equipo: 'Uruguay', condicion: 'Local', rival: 'Colombia', rival_ranking: 12, gf: 1, gc: 1 },
+    { equipo: 'Uruguay', condicion: 'Visitante', rival: 'Argentina', rival_ranking: 1, gf: 0, gc: 1 },
+    { equipo: 'Uruguay', condicion: 'Visitante', rival: 'Brasil', rival_ranking: 5, gf: 1, gc: 2 },
+    { equipo: 'Colombia', condicion: 'Local', rival: 'Bolivia', rival_ranking: 60, gf: 3, gc: 0 },
+    { equipo: 'Colombia', condicion: 'Local', rival: 'Ecuador', rival_ranking: 25, gf: 2, gc: 1 },
+    { equipo: 'Colombia', condicion: 'Visitante', rival: 'Uruguay', rival_ranking: 11, gf: 1, gc: 1 },
+    { equipo: 'Colombia', condicion: 'Visitante', rival: 'Argentina', rival_ranking: 1, gf: 2, gc: 1 },
+    { equipo: 'Ecuador', condicion: 'Local', rival: 'Perú', rival_ranking: 35, gf: 2, gc: 0 },
+    { equipo: 'Ecuador', condicion: 'Local', rival: 'Chile', rival_ranking: 40, gf: 1, gc: 0 },
+    { equipo: 'Ecuador', condicion: 'Visitante', rival: 'Colombia', rival_ranking: 12, gf: 1, gc: 2 },
+    { equipo: 'Ecuador', condicion: 'Visitante', rival: 'Brasil', rival_ranking: 5, gf: 1, gc: 1 },
+    { equipo: 'Paraguay', condicion: 'Local', rival: 'Bolivia', rival_ranking: 60, gf: 1, gc: 0 },
+    { equipo: 'Paraguay', condicion: 'Local', rival: 'Perú', rival_ranking: 35, gf: 2, gc: 1 },
+    { equipo: 'Paraguay', condicion: 'Visitante', rival: 'Uruguay', rival_ranking: 11, gf: 0, gc: 2 },
+    { equipo: 'Paraguay', condicion: 'Visitante', rival: 'Argentina', rival_ranking: 1, gf: 0, gc: 3 },
+    { equipo: 'Alemania', condicion: 'Local', rival: 'Países Bajos', rival_ranking: 7, gf: 2, gc: 1 },
+    { equipo: 'Alemania', condicion: 'Local', rival: 'Italia', rival_ranking: 8, gf: 1, gc: 0 },
+    { equipo: 'Alemania', condicion: 'Visitante', rival: 'Francia', rival_ranking: 2, gf: 1, gc: 2 },
+    { equipo: 'Alemania', condicion: 'Visitante', rival: 'España', rival_ranking: 3, gf: 2, gc: 2 },
+    { equipo: 'Francia', condicion: 'Local', rival: 'Alemania', rival_ranking: 9, gf: 2, gc: 1 },
+    { equipo: 'Francia', condicion: 'Local', rival: 'Bélgica', rival_ranking: 6, gf: 3, gc: 1 },
+    { equipo: 'Francia', condicion: 'Visitante', rival: 'Portugal', rival_ranking: 5, gf: 1, gc: 1 },
+    { equipo: 'Francia', condicion: 'Visitante', rival: 'España', rival_ranking: 3, gf: 0, gc: 2 },
+    { equipo: 'España', condicion: 'Local', rival: 'Italia', rival_ranking: 8, gf: 2, gc: 0 },
+    { equipo: 'España', condicion: 'Local', rival: 'Francia', rival_ranking: 2, gf: 2, gc: 0 },
+    { equipo: 'España', condicion: 'Visitante', rival: 'Alemania', rival_ranking: 9, gf: 2, gc: 2 },
+    { equipo: 'España', condicion: 'Visitante', rival: 'Portugal', rival_ranking: 5, gf: 1, gc: 1 },
+    { equipo: 'Inglaterra', condicion: 'Local', rival: 'Escocia', rival_ranking: 25, gf: 3, gc: 0 },
+    { equipo: 'Inglaterra', condicion: 'Local', rival: 'Bélgica', rival_ranking: 6, gf: 2, gc: 1 },
+    { equipo: 'Inglaterra', condicion: 'Visitante', rival: 'Italia', rival_ranking: 8, gf: 1, gc: 1 },
+    { equipo: 'Inglaterra', condicion: 'Visitante', rival: 'Países Bajos', rival_ranking: 7, gf: 2, gc: 2 },
+    { equipo: 'Portugal', condicion: 'Local', rival: 'España', rival_ranking: 3, gf: 1, gc: 1 },
+    { equipo: 'Portugal', condicion: 'Local', rival: 'Italia', rival_ranking: 8, gf: 2, gc: 1 },
+    { equipo: 'Portugal', condicion: 'Visitante', rival: 'Francia', rival_ranking: 2, gf: 1, gc: 1 },
+    { equipo: 'Portugal', condicion: 'Visitante', rival: 'Croacia', rival_ranking: 10, gf: 2, gc: 0 },
+    { equipo: 'Países Bajos', condicion: 'Local', rival: 'Bélgica', rival_ranking: 6, gf: 2, gc: 1 },
+    { equipo: 'Países Bajos', condicion: 'Local', rival: 'Inglaterra', rival_ranking: 4, gf: 2, gc: 2 },
+    { equipo: 'Países Bajos', condicion: 'Visitante', rival: 'Alemania', rival_ranking: 9, gf: 1, gc: 2 },
+    { equipo: 'Países Bajos', condicion: 'Visitante', rival: 'Francia', rival_ranking: 2, gf: 1, gc: 3 },
+    { equipo: 'Italia', condicion: 'Local', rival: 'Inglaterra', rival_ranking: 4, gf: 1, gc: 1 },
+    { equipo: 'Italia', condicion: 'Local', rival: 'Portugal', rival_ranking: 5, gf: 1, gc: 2 },
+    { equipo: 'Italia', condicion: 'Visitante', rival: 'España', rival_ranking: 3, gf: 0, gc: 2 },
+    { equipo: 'Italia', condicion: 'Visitante', rival: 'Alemania', rival_ranking: 9, gf: 0, gc: 1 },
+    { equipo: 'Croacia', condicion: 'Local', rival: 'Suiza', rival_ranking: 15, gf: 2, gc: 1 },
+    { equipo: 'Croacia', condicion: 'Local', rival: 'Austria', rival_ranking: 18, gf: 1, gc: 0 },
+    { equipo: 'Croacia', condicion: 'Visitante', rival: 'Portugal', rival_ranking: 5, gf: 0, gc: 2 },
+    { equipo: 'Croacia', condicion: 'Visitante', rival: 'Francia', rival_ranking: 2, gf: 1, gc: 2 },
+    { equipo: 'Bélgica', condicion: 'Local', rival: 'Países Bajos', rival_ranking: 7, gf: 1, gc: 2 },
+    { equipo: 'Bélgica', condicion: 'Local', rival: 'Escocia', rival_ranking: 25, gf: 2, gc: 0 },
+    { equipo: 'Bélgica', condicion: 'Visitante', rival: 'Francia', rival_ranking: 2, gf: 1, gc: 3 },
+    { equipo: 'Bélgica', condicion: 'Visitante', rival: 'Inglaterra', rival_ranking: 4, gf: 1, gc: 2 },
+    { equipo: 'Austria', condicion: 'Local', rival: 'Suecia', rival_ranking: 28, gf: 2, gc: 1 },
+    { equipo: 'Austria', condicion: 'Local', rival: 'Noruega', rival_ranking: 30, gf: 1, gc: 0 },
+    { equipo: 'Austria', condicion: 'Visitante', rival: 'Croacia', rival_ranking: 10, gf: 0, gc: 1 },
+    { equipo: 'Austria', condicion: 'Visitante', rival: 'Suiza', rival_ranking: 15, gf: 1, gc: 1 },
+    { equipo: 'Suiza', condicion: 'Local', rival: 'Austria', rival_ranking: 18, gf: 1, gc: 1 },
+    { equipo: 'Suiza', condicion: 'Local', rival: 'Suecia', rival_ranking: 28, gf: 2, gc: 0 },
+    { equipo: 'Suiza', condicion: 'Visitante', rival: 'Croacia', rival_ranking: 10, gf: 1, gc: 2 },
+    { equipo: 'Suiza', condicion: 'Visitante', rival: 'Noruega', rival_ranking: 30, gf: 1, gc: 1 },
+    { equipo: 'Escocia', condicion: 'Local', rival: 'Noruega', rival_ranking: 30, gf: 2, gc: 1 },
+    { equipo: 'Escocia', condicion: 'Local', rival: 'Suecia', rival_ranking: 28, gf: 1, gc: 0 },
+    { equipo: 'Escocia', condicion: 'Visitante', rival: 'Inglaterra', rival_ranking: 4, gf: 0, gc: 3 },
+    { equipo: 'Escocia', condicion: 'Visitante', rival: 'Bélgica', rival_ranking: 6, gf: 0, gc: 2 },
+    { equipo: 'Noruega', condicion: 'Local', rival: 'Escocia', rival_ranking: 25, gf: 1, gc: 2 },
+    { equipo: 'Noruega', condicion: 'Local', rival: 'Suiza', rival_ranking: 15, gf: 1, gc: 1 },
+    { equipo: 'Noruega', condicion: 'Visitante', rival: 'Austria', rival_ranking: 18, gf: 0, gc: 1 },
+    { equipo: 'Noruega', condicion: 'Visitante', rival: 'Suecia', rival_ranking: 28, gf: 2, gc: 2 },
+    { equipo: 'Suecia', condicion: 'Local', rival: 'Noruega', rival_ranking: 30, gf: 2, gc: 2 },
+    { equipo: 'Suecia', condicion: 'Local', rival: 'Escocia', rival_ranking: 25, gf: 0, gc: 1 },
+    { equipo: 'Suecia', condicion: 'Visitante', rival: 'Suiza', rival_ranking: 15, gf: 0, gc: 2 },
+    { equipo: 'Suecia', condicion: 'Visitante', rival: 'Austria', rival_ranking: 18, gf: 1, gc: 2 },
+    { equipo: 'Turquía', condicion: 'Local', rival: 'República Checa', rival_ranking: 35, gf: 2, gc: 0 },
+    { equipo: 'Turquía', condicion: 'Local', rival: 'Bosnia y Herzegovina', rival_ranking: 40, gf: 3, gc: 1 },
+    { equipo: 'Turquía', condicion: 'Visitante', rival: 'Austria', rival_ranking: 18, gf: 1, gc: 1 },
+    { equipo: 'Turquía', condicion: 'Visitante', rival: 'Croacia', rival_ranking: 10, gf: 1, gc: 2 },
+    { equipo: 'República Checa', condicion: 'Local', rival: 'Bosnia y Herzegovina', rival_ranking: 40, gf: 2, gc: 1 },
+    { equipo: 'República Checa', condicion: 'Local', rival: 'Turquía', rival_ranking: 30, gf: 1, gc: 2 },
+    { equipo: 'República Checa', condicion: 'Visitante', rival: 'Austria', rival_ranking: 18, gf: 1, gc: 1 },
+    { equipo: 'República Checa', condicion: 'Visitante', rival: 'Croacia', rival_ranking: 10, gf: 0, gc: 2 },
+    { equipo: 'Bosnia y Herzegovina', condicion: 'Local', rival: 'República Checa', rival_ranking: 35, gf: 1, gc: 2 },
+    { equipo: 'Bosnia y Herzegovina', condicion: 'Local', rival: 'Turquía', rival_ranking: 30, gf: 1, gc: 3 },
+    { equipo: 'Bosnia y Herzegovina', condicion: 'Visitante', rival: 'Croacia', rival_ranking: 10, gf: 0, gc: 2 },
+    { equipo: 'Bosnia y Herzegovina', condicion: 'Visitante', rival: 'Austria', rival_ranking: 18, gf: 1, gc: 2 },
+    { equipo: 'Japón', condicion: 'Local', rival: 'Corea del Norte', rival_ranking: 110, gf: 2, gc: 0 },
+    { equipo: 'Japón', condicion: 'Local', rival: 'China', rival_ranking: 80, gf: 3, gc: 1 },
+    { equipo: 'Japón', condicion: 'Visitante', rival: 'Irán', rival_ranking: 20, gf: 1, gc: 1 },
+    { equipo: 'Japón', condicion: 'Visitante', rival: 'Corea del Sur', rival_ranking: 25, gf: 0, gc: 1 },
+    { equipo: 'Irán', condicion: 'Local', rival: 'Uzbekistán', rival_ranking: 70, gf: 2, gc: 0 },
+    { equipo: 'Irán', condicion: 'Local', rival: 'Irak', rival_ranking: 60, gf: 1, gc: 0 },
+    { equipo: 'Irán', condicion: 'Visitante', rival: 'Japón', rival_ranking: 15, gf: 1, gc: 1 },
+    { equipo: 'Irán', condicion: 'Visitante', rival: 'Qatar', rival_ranking: 50, gf: 1, gc: 0 },
+    { equipo: 'Corea del Sur', condicion: 'Local', rival: 'China', rival_ranking: 80, gf: 2, gc: 0 },
+    { equipo: 'Corea del Sur', condicion: 'Local', rival: 'Tailandia', rival_ranking: 100, gf: 3, gc: 0 },
+    { equipo: 'Corea del Sur', condicion: 'Visitante', rival: 'Japón', rival_ranking: 15, gf: 1, gc: 0 },
+    { equipo: 'Corea del Sur', condicion: 'Visitante', rival: 'Australia', rival_ranking: 30, gf: 1, gc: 1 },
+    { equipo: 'Australia', condicion: 'Local', rival: 'Arabia Saudita', rival_ranking: 55, gf: 2, gc: 1 },
+    { equipo: 'Australia', condicion: 'Local', rival: 'Jordania', rival_ranking: 75, gf: 3, gc: 0 },
+    { equipo: 'Australia', condicion: 'Visitante', rival: 'Corea del Sur', rival_ranking: 25, gf: 1, gc: 1 },
+    { equipo: 'Australia', condicion: 'Visitante', rival: 'Irán', rival_ranking: 20, gf: 0, gc: 1 },
+    { equipo: 'Qatar', condicion: 'Local', rival: 'India', rival_ranking: 100, gf: 2, gc: 0 },
+    { equipo: 'Qatar', condicion: 'Local', rival: 'Kuwait', rival_ranking: 90, gf: 1, gc: 0 },
+    { equipo: 'Qatar', condicion: 'Visitante', rival: 'Irán', rival_ranking: 20, gf: 0, gc: 1 },
+    { equipo: 'Qatar', condicion: 'Visitante', rival: 'Arabia Saudita', rival_ranking: 55, gf: 1, gc: 1 },
+    { equipo: 'Arabia Saudita', condicion: 'Local', rival: 'Omán', rival_ranking: 85, gf: 2, gc: 0 },
+    { equipo: 'Arabia Saudita', condicion: 'Local', rival: 'Qatar', rival_ranking: 50, gf: 1, gc: 1 },
+    { equipo: 'Arabia Saudita', condicion: 'Visitante', rival: 'Australia', rival_ranking: 30, gf: 1, gc: 2 },
+    { equipo: 'Arabia Saudita', condicion: 'Visitante', rival: 'Irak', rival_ranking: 60, gf: 1, gc: 1 },
+    { equipo: 'Uzbekistán', condicion: 'Local', rival: 'Turkmenistán', rival_ranking: 120, gf: 2, gc: 0 },
+    { equipo: 'Uzbekistán', condicion: 'Local', rival: 'Irak', rival_ranking: 60, gf: 1, gc: 1 },
+    { equipo: 'Uzbekistán', condicion: 'Visitante', rival: 'Irán', rival_ranking: 20, gf: 0, gc: 2 },
+    { equipo: 'Uzbekistán', condicion: 'Visitante', rival: 'Corea del Sur', rival_ranking: 25, gf: 1, gc: 2 },
+    { equipo: 'Jordania', condicion: 'Local', rival: 'Tayikistán', rival_ranking: 95, gf: 2, gc: 0 },
+    { equipo: 'Jordania', condicion: 'Local', rival: 'Palestina', rival_ranking: 100, gf: 1, gc: 0 },
+    { equipo: 'Jordania', condicion: 'Visitante', rival: 'Australia', rival_ranking: 30, gf: 0, gc: 3 },
+    { equipo: 'Jordania', condicion: 'Visitante', rival: 'Arabia Saudita', rival_ranking: 55, gf: 0, gc: 2 },
+    { equipo: 'Irak', condicion: 'Local', rival: 'Arabia Saudita', rival_ranking: 55, gf: 1, gc: 1 },
+    { equipo: 'Irak', condicion: 'Local', rival: 'Uzbekistán', rival_ranking: 70, gf: 1, gc: 1 },
+    { equipo: 'Irak', condicion: 'Visitante', rival: 'Irán', rival_ranking: 20, gf: 0, gc: 1 },
+    { equipo: 'Irak', condicion: 'Visitante', rival: 'Corea del Sur', rival_ranking: 25, gf: 0, gc: 2 },
+    { equipo: 'Marruecos', condicion: 'Local', rival: 'Zambia', rival_ranking: 75, gf: 2, gc: 0 },
+    { equipo: 'Marruecos', condicion: 'Local', rival: 'Tanzania', rival_ranking: 110, gf: 3, gc: 0 },
+    { equipo: 'Marruecos', condicion: 'Visitante', rival: 'Egipto', rival_ranking: 35, gf: 1, gc: 1 },
+    { equipo: 'Marruecos', condicion: 'Visitante', rival: 'Senegal', rival_ranking: 20, gf: 0, gc: 1 },
+    { equipo: 'Túnez', condicion: 'Local', rival: 'Guinea Ecuatorial', rival_ranking: 90, gf: 2, gc: 0 },
+    { equipo: 'Túnez', condicion: 'Local', rival: 'Libia', rival_ranking: 120, gf: 1, gc: 0 },
+    { equipo: 'Túnez', condicion: 'Visitante', rival: 'Argelia', rival_ranking: 30, gf: 0, gc: 1 },
+    { equipo: 'Túnez', condicion: 'Visitante', rival: 'Marruecos', rival_ranking: 15, gf: 1, gc: 2 },
+    { equipo: 'Egipto', condicion: 'Local', rival: 'Burkina Faso', rival_ranking: 60, gf: 2, gc: 1 },
+    { equipo: 'Egipto', condicion: 'Local', rival: 'Sierra Leona', rival_ranking: 110, gf: 3, gc: 0 },
+    { equipo: 'Egipto', condicion: 'Visitante', rival: 'Marruecos', rival_ranking: 15, gf: 1, gc: 1 },
+    { equipo: 'Egipto', condicion: 'Visitante', rival: 'Ghana', rival_ranking: 50, gf: 1, gc: 2 },
+    { equipo: 'Argelia', condicion: 'Local', rival: 'Túnez', rival_ranking: 40, gf: 1, gc: 0 },
+    { equipo: 'Argelia', condicion: 'Local', rival: 'Níger', rival_ranking: 120, gf: 2, gc: 0 },
+    { equipo: 'Argelia', condicion: 'Visitante', rival: 'Costa de Marfil', rival_ranking: 18, gf: 1, gc: 1 },
+    { equipo: 'Argelia', condicion: 'Visitante', rival: 'Senegal', rival_ranking: 20, gf: 0, gc: 2 },
+    { equipo: 'Ghana', condicion: 'Local', rival: 'Malí', rival_ranking: 50, gf: 2, gc: 1 },
+    { equipo: 'Ghana', condicion: 'Local', rival: 'Uganda', rival_ranking: 90, gf: 3, gc: 0 },
+    { equipo: 'Ghana', condicion: 'Visitante', rival: 'Egipto', rival_ranking: 35, gf: 2, gc: 1 },
+    { equipo: 'Ghana', condicion: 'Visitante', rival: 'Nigeria', rival_ranking: 30, gf: 1, gc: 1 },
+    { equipo: 'Cabo Verde', condicion: 'Local', rival: 'Angola', rival_ranking: 100, gf: 2, gc: 0 },
+    { equipo: 'Cabo Verde', condicion: 'Local', rival: 'Mauritania', rival_ranking: 110, gf: 1, gc: 0 },
+    { equipo: 'Cabo Verde', condicion: 'Visitante', rival: 'Senegal', rival_ranking: 20, gf: 0, gc: 2 },
+    { equipo: 'Cabo Verde', condicion: 'Visitante', rival: 'Costa de Marfil', rival_ranking: 18, gf: 1, gc: 2 },
+    { equipo: 'Sudáfrica', condicion: 'Local', rival: 'Namibia', rival_ranking: 120, gf: 2, gc: 0 },
+    { equipo: 'Sudáfrica', condicion: 'Local', rival: 'Zimbabwe', rival_ranking: 110, gf: 1, gc: 0 },
+    { equipo: 'Sudáfrica', condicion: 'Visitante', rival: 'Nigeria', rival_ranking: 30, gf: 1, gc: 1 },
+    { equipo: 'Sudáfrica', condicion: 'Visitante', rival: 'Ghana', rival_ranking: 50, gf: 0, gc: 2 },
+    { equipo: 'Senegal', condicion: 'Local', rival: 'Camerún', rival_ranking: 45, gf: 2, gc: 1 },
+    { equipo: 'Senegal', condicion: 'Local', rival: 'Cabo Verde', rival_ranking: 65, gf: 2, gc: 0 },
+    { equipo: 'Senegal', condicion: 'Visitante', rival: 'Marruecos', rival_ranking: 15, gf: 1, gc: 0 },
+    { equipo: 'Senegal', condicion: 'Visitante', rival: 'Argelia', rival_ranking: 30, gf: 2, gc: 0 },
+    { equipo: 'Costa de Marfil', condicion: 'Local', rival: 'Argelia', rival_ranking: 30, gf: 1, gc: 1 },
+    { equipo: 'Costa de Marfil', condicion: 'Local', rival: 'Cabo Verde', rival_ranking: 65, gf: 2, gc: 1 },
+    { equipo: 'Costa de Marfil', condicion: 'Visitante', rival: 'Senegal', rival_ranking: 20, gf: 0, gc: 1 },
+    { equipo: 'Costa de Marfil', condicion: 'Visitante', rival: 'Ghana', rival_ranking: 50, gf: 1, gc: 1 },
+    { equipo: 'RD Congo', condicion: 'Local', rival: 'Gabón', rival_ranking: 100, gf: 2, gc: 0 },
+    { equipo: 'RD Congo', condicion: 'Local', rival: 'Sudán', rival_ranking: 110, gf: 1, gc: 0 },
+    { equipo: 'RD Congo', condicion: 'Visitante', rival: 'Senegal', rival_ranking: 20, gf: 0, gc: 2 },
+    { equipo: 'RD Congo', condicion: 'Visitante', rival: 'Marruecos', rival_ranking: 15, gf: 1, gc: 2 },
+    { equipo: 'México', condicion: 'Local', rival: 'Jamaica', rival_ranking: 60, gf: 2, gc: 0 },
+    { equipo: 'México', condicion: 'Local', rival: 'Honduras', rival_ranking: 70, gf: 3, gc: 1 },
+    { equipo: 'México', condicion: 'Visitante', rival: 'Estados Unidos', rival_ranking: 12, gf: 1, gc: 2 },
+    { equipo: 'México', condicion: 'Visitante', rival: 'Canadá', rival_ranking: 40, gf: 1, gc: 1 },
+    { equipo: 'Estados Unidos', condicion: 'Local', rival: 'México', rival_ranking: 15, gf: 2, gc: 1 },
+    { equipo: 'Estados Unidos', condicion: 'Local', rival: 'Panamá', rival_ranking: 45, gf: 3, gc: 0 },
+    { equipo: 'Estados Unidos', condicion: 'Visitante', rival: 'Canadá', rival_ranking: 40, gf: 1, gc: 1 },
+    { equipo: 'Estados Unidos', condicion: 'Visitante', rival: 'Costa Rica', rival_ranking: 50, gf: 2, gc: 0 },
+    { equipo: 'Canadá', condicion: 'Local', rival: 'Estados Unidos', rival_ranking: 12, gf: 1, gc: 1 },
+    { equipo: 'Canadá', condicion: 'Local', rival: 'México', rival_ranking: 15, gf: 1, gc: 1 },
+    { equipo: 'Canadá', condicion: 'Visitante', rival: 'Jamaica', rival_ranking: 60, gf: 2, gc: 1 },
+    { equipo: 'Canadá', condicion: 'Visitante', rival: 'Panamá', rival_ranking: 45, gf: 1, gc: 1 },
+    { equipo: 'Panamá', condicion: 'Local', rival: 'Canadá', rival_ranking: 40, gf: 1, gc: 1 },
+    { equipo: 'Panamá', condicion: 'Local', rival: 'Haití', rival_ranking: 90, gf: 2, gc: 0 },
+    { equipo: 'Panamá', condicion: 'Visitante', rival: 'Estados Unidos', rival_ranking: 12, gf: 0, gc: 3 },
+    { equipo: 'Panamá', condicion: 'Visitante', rival: 'México', rival_ranking: 15, gf: 1, gc: 2 },
+    { equipo: 'Haití', condicion: 'Local', rival: 'Curazao', rival_ranking: 95, gf: 2, gc: 0 },
+    { equipo: 'Haití', condicion: 'Local', rival: 'Guatemala', rival_ranking: 100, gf: 1, gc: 1 },
+    { equipo: 'Haití', condicion: 'Visitante', rival: 'Panamá', rival_ranking: 45, gf: 0, gc: 2 },
+    { equipo: 'Haití', condicion: 'Visitante', rival: 'Honduras', rival_ranking: 70, gf: 1, gc: 2 },
+    { equipo: 'Nueva Zelanda', condicion: 'Local', rival: 'Islas Salomón', rival_ranking: 140, gf: 3, gc: 0 },
+    { equipo: 'Nueva Zelanda', condicion: 'Local', rival: 'Fiyi', rival_ranking: 150, gf: 4, gc: 1 },
+    { equipo: 'Nueva Zelanda', condicion: 'Visitante', rival: 'Nueva Caledonia', rival_ranking: 130, gf: 2, gc: 0 },
+    { equipo: 'Nueva Zelanda', condicion: 'Visitante', rival: 'Tahití', rival_ranking: 135, gf: 1, gc: 0 },
+];
+
+const RANKINGS = {
+    'Alemania': 9,
+    'Arabia Saudita': 55,
+    'Argelia': 30,
+    'Argentina': 1,
+    'Australia': 30,
+    'Austria': 18,
+    'Bosnia y Herzegovina': 40,
+    'Brasil': 5,
+    'Bélgica': 6,
+    'Cabo Verde': 65,
+    'Canadá': 40,
+    'Colombia': 12,
+    'Corea del Sur': 25,
+    'Costa de Marfil': 18,
+    'Croacia': 10,
+    'Ecuador': 25,
+    'Egipto': 35,
+    'Escocia': 25,
+    'España': 3,
+    'Estados Unidos': 12,
+    'Francia': 2,
+    'Ghana': 50,
+    'Haití': 90,
+    'Inglaterra': 4,
+    'Irak': 60,
+    'Irán': 20,
+    'Italia': 8,
+    'Japón': 15,
+    'Jordania': 75,
+    'Marruecos': 15,
+    'México': 15,
+    'Noruega': 30,
+    'Nueva Zelanda': 97,
+    'Panamá': 45,
+    'Paraguay': 45,
+    'Países Bajos': 7,
+    'Portugal': 5,
+    'Qatar': 50,
+    'RD Congo': 43,
+    'República Checa': 35,
+    'Senegal': 20,
+    'Sudáfrica': 54,
+    'Suecia': 28,
+    'Suiza': 15,
+    'Turquía': 30,
+    'Túnez': 40,
+    'Uruguay': 11,
+    'Uzbekistán': 70,
+};
+
+const PARTIDOS = [
+    { id: 1, grupo: 'A', local: 'México', visitante: 'Sudáfrica', fecha: '2026-06-11' },
+    { id: 2, grupo: 'A', local: 'Corea del Sur', visitante: 'República Checa', fecha: '2026-06-11' },
+    { id: 3, grupo: 'A', local: 'República Checa', visitante: 'México', fecha: '2026-06-18' },
+    { id: 4, grupo: 'A', local: 'Sudáfrica', visitante: 'Corea del Sur', fecha: '2026-06-18' },
+    { id: 5, grupo: 'A', local: 'México', visitante: 'Corea del Sur', fecha: '2026-06-24' },
+    { id: 6, grupo: 'A', local: 'Sudáfrica', visitante: 'República Checa', fecha: '2026-06-24' },
+    { id: 7, grupo: 'B', local: 'Canadá', visitante: 'Bosnia y Herzegovina', fecha: '2026-06-12' },
+    { id: 8, grupo: 'B', local: 'Qatar', visitante: 'Suiza', fecha: '2026-06-13' },
+    { id: 9, grupo: 'B', local: 'Suiza', visitante: 'Bosnia y Herzegovina', fecha: '2026-06-18' },
+    { id: 10, grupo: 'B', local: 'Canadá', visitante: 'Qatar', fecha: '2026-06-18' },
+    { id: 11, grupo: 'B', local: 'Suiza', visitante: 'Canadá', fecha: '2026-06-24' },
+    { id: 12, grupo: 'B', local: 'Bosnia y Herzegovina', visitante: 'Qatar', fecha: '2026-06-24' },
+    { id: 13, grupo: 'C', local: 'Brasil', visitante: 'Marruecos', fecha: '2026-06-13' },
+    { id: 14, grupo: 'C', local: 'Haití', visitante: 'Escocia', fecha: '2026-06-13' },
+    { id: 15, grupo: 'C', local: 'Escocia', visitante: 'Marruecos', fecha: '2026-06-19' },
+    { id: 16, grupo: 'C', local: 'Brasil', visitante: 'Haití', fecha: '2026-06-19' },
+    { id: 17, grupo: 'C', local: 'Escocia', visitante: 'Brasil', fecha: '2026-06-24' },
+    { id: 18, grupo: 'C', local: 'Marruecos', visitante: 'Haití', fecha: '2026-06-24' },
+    { id: 19, grupo: 'D', local: 'Estados Unidos', visitante: 'Paraguay', fecha: '2026-06-12' },
+    { id: 20, grupo: 'D', local: 'Australia', visitante: 'Turquía', fecha: '2026-06-13' },
+    { id: 21, grupo: 'D', local: 'Estados Unidos', visitante: 'Australia', fecha: '2026-06-19' },
+    { id: 22, grupo: 'D', local: 'Turquía', visitante: 'Paraguay', fecha: '2026-06-19' },
+    { id: 23, grupo: 'D', local: 'Turquía', visitante: 'Estados Unidos', fecha: '2026-06-25' },
+    { id: 24, grupo: 'D', local: 'Paraguay', visitante: 'Australia', fecha: '2026-06-25' },
+    { id: 25, grupo: 'E', local: 'Alemania', visitante: 'Curaçao', fecha: '2026-06-14' },
+    { id: 26, grupo: 'E', local: 'Costa de Marfil', visitante: 'Ecuador', fecha: '2026-06-14' },
+    { id: 27, grupo: 'E', local: 'Alemania', visitante: 'Costa de Marfil', fecha: '2026-06-20' },
+    { id: 28, grupo: 'E', local: 'Curaçao', visitante: 'Ecuador', fecha: '2026-06-20' },
+    { id: 29, grupo: 'E', local: 'Ecuador', visitante: 'Alemania', fecha: '2026-06-25' },
+    { id: 30, grupo: 'E', local: 'Curaçao', visitante: 'Costa de Marfil', fecha: '2026-06-25' },
+    { id: 31, grupo: 'F', local: 'Países Bajos', visitante: 'Suecia', fecha: '2026-06-20' },
+    { id: 32, grupo: 'F', local: 'Túnez', visitante: 'Japón', fecha: '2026-06-20' },
+    { id: 33, grupo: 'F', local: 'Países Bajos', visitante: 'Túnez', fecha: '2026-06-25' },
+    { id: 34, grupo: 'F', local: 'Japón', visitante: 'Suecia', fecha: '2026-06-25' },
+    { id: 35, grupo: 'F', local: 'Japón', visitante: 'Países Bajos', fecha: '2026-06-21' },
+    { id: 36, grupo: 'F', local: 'Suecia', visitante: 'Túnez', fecha: '2026-06-21' },
+    { id: 37, grupo: 'G', local: 'Bélgica', visitante: 'Irán', fecha: '2026-06-21' },
+    { id: 38, grupo: 'G', local: 'Nueva Zelanda', visitante: 'Egipto', fecha: '2026-06-21' },
+    { id: 39, grupo: 'G', local: 'Bélgica', visitante: 'Nueva Zelanda', fecha: '2026-06-26' },
+    { id: 40, grupo: 'G', local: 'Irán', visitante: 'Egipto', fecha: '2026-06-26' },
+    { id: 41, grupo: 'G', local: 'Egipto', visitante: 'Bélgica', fecha: '2026-06-26' },
+    { id: 42, grupo: 'G', local: 'Nueva Zelanda', visitante: 'Irán', fecha: '2026-06-26' },
+    { id: 43, grupo: 'H', local: 'España', visitante: 'Cabo Verde', fecha: '2026-06-15' },
+    { id: 44, grupo: 'H', local: 'Arabia Saudita', visitante: 'Uruguay', fecha: '2026-06-15' },
+    { id: 45, grupo: 'H', local: 'España', visitante: 'Arabia Saudita', fecha: '2026-06-21' },
+    { id: 46, grupo: 'H', local: 'Uruguay', visitante: 'Cabo Verde', fecha: '2026-06-21' },
+    { id: 47, grupo: 'H', local: 'Uruguay', visitante: 'España', fecha: '2026-06-26' },
+    { id: 48, grupo: 'H', local: 'Cabo Verde', visitante: 'Arabia Saudita', fecha: '2026-06-26' },
+    { id: 49, grupo: 'I', local: 'Francia', visitante: 'Senegal', fecha: '2026-06-16' },
+    { id: 50, grupo: 'I', local: 'Irak', visitante: 'Noruega', fecha: '2026-06-16' },
+    { id: 51, grupo: 'I', local: 'Francia', visitante: 'Irak', fecha: '2026-06-22' },
+    { id: 52, grupo: 'I', local: 'Noruega', visitante: 'Senegal', fecha: '2026-06-22' },
+    { id: 53, grupo: 'I', local: 'Noruega', visitante: 'Francia', fecha: '2026-06-26' },
+    { id: 54, grupo: 'I', local: 'Senegal', visitante: 'Irak', fecha: '2026-06-26' },
+    { id: 55, grupo: 'J', local: 'Argentina', visitante: 'Argelia', fecha: '2026-06-16' },
+    { id: 56, grupo: 'J', local: 'Austria', visitante: 'Jordania', fecha: '2026-06-16' },
+    { id: 57, grupo: 'J', local: 'Argentina', visitante: 'Austria', fecha: '2026-06-22' },
+    { id: 58, grupo: 'J', local: 'Jordania', visitante: 'Argelia', fecha: '2026-06-22' },
+    { id: 59, grupo: 'J', local: 'Jordania', visitante: 'Argentina', fecha: '2026-06-27' },
+    { id: 60, grupo: 'J', local: 'Argelia', visitante: 'Austria', fecha: '2026-06-27' },
+    { id: 61, grupo: 'K', local: 'Portugal', visitante: 'Uzbekistán', fecha: '2026-06-17' },
+    { id: 62, grupo: 'K', local: 'Colombia', visitante: 'RD Congo', fecha: '2026-06-17' },
+    { id: 63, grupo: 'K', local: 'Portugal', visitante: 'Colombia', fecha: '2026-06-23' },
+    { id: 64, grupo: 'K', local: 'RD Congo', visitante: 'Uzbekistán', fecha: '2026-06-23' },
+    { id: 65, grupo: 'K', local: 'Colombia', visitante: 'Portugal', fecha: '2026-06-27' },
+    { id: 66, grupo: 'K', local: 'RD Congo', visitante: 'Uzbekistán', fecha: '2026-06-27' },
+    { id: 67, grupo: 'L', local: 'Inglaterra', visitante: 'Ghana', fecha: '2026-06-17' },
+    { id: 68, grupo: 'L', local: 'Panamá', visitante: 'Croacia', fecha: '2026-06-17' },
+    { id: 69, grupo: 'L', local: 'Inglaterra', visitante: 'Panamá', fecha: '2026-06-23' },
+    { id: 70, grupo: 'L', local: 'Croacia', visitante: 'Ghana', fecha: '2026-06-23' },
+    { id: 71, grupo: 'L', local: 'Panamá', visitante: 'Inglaterra', fecha: '2026-06-27' },
+    { id: 72, grupo: 'L', local: 'Croacia', visitante: 'Ghana', fecha: '2026-06-27' },
+];
+
+const GRUPOS = {
+    'A': ['México', 'Sudáfrica', 'Corea del Sur', 'República Checa'],
+    'B': ['Canadá', 'Suiza', 'Qatar', 'Bosnia y Herzegovina'],
+    'C': ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
+    'D': ['Estados Unidos', 'Paraguay', 'Australia', 'Turquía'],
+    'E': ['Alemania', 'Curaçao', 'Costa de Marfil', 'Ecuador'],
+    'F': ['Países Bajos', 'Japón', 'Túnez', 'Suecia'],
+    'G': ['Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda'],
+    'H': ['España', 'Cabo Verde', 'Arabia Saudita', 'Uruguay'],
+    'I': ['Francia', 'Senegal', 'Noruega', 'Irak'],
+    'J': ['Argentina', 'Argelia', 'Austria', 'Jordania'],
+    'K': ['Portugal', 'Uzbekistán', 'Colombia', 'RD Congo'],
+    'L': ['Inglaterra', 'Croacia', 'Ghana', 'Panamá'],
+};
+
+
+// ==================== STATE ====================
+let enteredResults = JSON.parse(localStorage.getItem('wc2026_results') || '[]');
+let bets = JSON.parse(localStorage.getItem('wc2026_bets') || '[]');
+let bankroll = parseFloat(localStorage.getItem('wc2026_bankroll')) || 1000;
+
+// ==================== CORE: CALCULATE xG FROM ALL MATCHES ====================
+function calculateAllStats() {
+    const stats = {};
+    const allTeams = [...new Set(HISTORICAL_MATCHES.map(m => m.equipo))];
+    allTeams.forEach(t => { stats[t] = { home: [], away: [] }; });
+
+    // Historical base (4 matches per team)
+    HISTORICAL_MATCHES.forEach(m => {
+        const factor = 1.0 + (100 - m.rival_ranking) / 200;
+        const xg = m.gf * factor * 0.85;
+        const xga = m.gc * factor * 0.85;
+        if (m.condicion === 'Local') stats[m.equipo].home.push({ xg, xga, rival: m.rival, wc: false });
+        else stats[m.equipo].away.push({ xg, xga, rival: m.rival, wc: false });
+    });
+
+    // Add entered World Cup results
+    enteredResults.forEach(r => {
+        const homeRivalRank = RANKINGS[r.away] || 50;
+        const awayRivalRank = RANKINGS[r.local] || 50;
+        const homeFactor = 1.0 + (100 - homeRivalRank) / 200;
+        const awayFactor = 1.0 + (100 - awayRivalRank) / 200;
+
+        const home_xg = r.localGoals * homeFactor * 0.85;
+        const home_xga = r.awayGoals * homeFactor * 0.85;
+        const away_xg = r.awayGoals * awayFactor * 0.85;
+        const away_xga = r.localGoals * awayFactor * 0.85;
+
+        if (!stats[r.local]) stats[r.local] = { home: [], away: [] };
+        if (!stats[r.away]) stats[r.away] = { home: [], away: [] };
+
+        stats[r.local].home.push({ xg: home_xg, xga: home_xga, rival: r.away, wc: true });
+        stats[r.away].away.push({ xg: away_xg, xga: away_xga, rival: r.local, wc: true });
+    });
+
+    // Calculate averages
+    const EQUIPOS = [];
+    for (const [team, data] of Object.entries(stats)) {
+        const home_xg = data.home.length > 0 ? data.home.reduce((a,b)=>a+b.xg,0)/data.home.length : 1.0;
+        const home_xga = data.home.length > 0 ? data.home.reduce((a,b)=>a+b.xga,0)/data.home.length : 1.0;
+        const away_xg = data.away.length > 0 ? data.away.reduce((a,b)=>a+b.xg,0)/data.away.length : 1.0;
+        const away_xga = data.away.length > 0 ? data.away.reduce((a,b)=>a+b.xga,0)/data.away.length : 1.0;
+        const wc_home = data.home.filter(m=>m.wc).length;
+        const wc_away = data.away.filter(m=>m.wc).length;
+
+        EQUIPOS.push({
+            nombre: team,
+            home_xg: parseFloat(home_xg.toFixed(2)),
+            home_xga: parseFloat(home_xga.toFixed(2)),
+            away_xg: parseFloat(away_xg.toFixed(2)),
+            away_xga: parseFloat(away_xga.toFixed(2)),
+            total_home: data.home.length,
+            total_away: data.away.length,
+            wc_home, wc_away
+        });
+    }
+    return EQUIPOS;
+}
+
+let EQUIPOS = calculateAllStats();
+
+function getTeam(name) { return EQUIPOS.find(e => e.nombre === name); }
+
+function poisson(lambda) {
+    const L = Math.exp(-lambda);
+    let k = 0, p = 1;
+    do { k++; p *= Math.random(); } while (p > L);
+    return k - 1;
+}
+
+function predictMatch(localName, awayName) {
+    const local = getTeam(localName), away = getTeam(awayName);
+    if (!local || !away) return null;
+    const localXG = (local.home_xg + away.away_xga) / 2;
+    const awayXG = (away.away_xg + local.home_xga) / 2;
+    let wins = 0, draws = 0, losses = 0, over25 = 0, under25 = 0, btts = 0;
+    let totalLocal = 0, totalAway = 0;
+    for (let i = 0; i < 10000; i++) {
+        const lg = poisson(localXG), ag = poisson(awayXG);
+        totalLocal += lg; totalAway += ag;
+        if (lg > ag) wins++; else if (lg === ag) draws++; else losses++;
+        if (lg + ag > 2.5) over25++; else under25++;
+        if (lg > 0 && ag > 0) btts++;
+    }
+    return {
+        local: localName, away: awayName,
+        localXG: localXG.toFixed(2), awayXG: awayXG.toFixed(2),
+        prob1: (wins/100).toFixed(1), probX: (draws/100).toFixed(1), prob2: (losses/100).toFixed(1),
+        avgLocal: (totalLocal/10000).toFixed(2), avgAway: (totalAway/10000).toFixed(2),
+        over25: (over25/100).toFixed(1), under25: (under25/100).toFixed(1),
+        btts: (btts/100).toFixed(1), bttsNo: (100-btts/100).toFixed(1)
+    };
+}
+
+function simulateMatch(localName, awayName) {
+    const local = getTeam(localName), away = getTeam(awayName);
+    if (!local || !away) return null;
+    const localXG = (local.home_xg + away.away_xga) / 2;
+    const awayXG = (away.away_xg + local.home_xga) / 2;
+    const lg = poisson(localXG), ag = poisson(awayXG);
+    return { local: localName, away: awayName, localGoals: lg, awayGoals: ag, result: lg>ag?'1':(lg<ag?'2':'X') };
+}
+
+function showTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+}
+
+// ==================== RENDER MATCHES ====================
+function renderMatches() {
+    const container = document.getElementById('matches-container');
+    let html = '', currentGroup = '';
+    PARTIDOS.forEach(p => {
+        if (p.grupo !== currentGroup) {
+            if (currentGroup !== '') html += '</div>';
+            currentGroup = p.grupo;
+            html += `<h3 style="color:#e94560;margin:15px 0 8px;">Grupo ${p.grupo}</h3><div>`;
+        }
+        const existing = enteredResults.find(r => r.matchId === p.id);
+        const resultHtml = existing
+            ? `<span style="color:#4ecca3;font-weight:bold;font-size:1.1em;">${existing.localGoals} - ${existing.awayGoals}</span> <span style="color:#888;font-size:.8em;">✓</span>`
+            : `<button class="predict-btn" onclick="predictAndShow(${p.id},'${p.local}','${p.visitante}')">🔮 Predecir</button>`;
+        html += `
+            <div class="match-card" id="match-${p.id}">
+                <div class="match-info">
+                    <span class="match-group">${p.grupo}</span>
+                    <span class="team-name team-home">${p.local}</span>
+                    <span class="vs">VS</span>
+                    <span class="team-name team-away">${p.visitante}</span>
+                    <span class="match-date">${p.fecha}</span>
+                </div>
+                ${resultHtml}
+            </div>
+            <div class="prediction-result" id="pred-${p.id}"></div>`;
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function predictAndShow(id, local, away) {
+    const pred = predictMatch(local, away);
+    const div = document.getElementById(`pred-${id}`);
+    div.classList.add('show');
+    div.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:12px;">
+            <div style="text-align:center;"><div style="font-size:1.8em;color:#4ecca3;font-weight:bold;">${pred.avgLocal}</div><div style="color:#888;font-size:.8em;">xG ${pred.local}</div></div>
+            <div style="text-align:center;"><div style="font-size:1.8em;color:#f9a825;font-weight:bold;">${pred.avgAway}</div><div style="color:#888;font-size:.8em;">xG ${pred.away}</div></div>
+        </div>
+        <div style="margin-bottom:8px;font-size:.9em;"><strong>📊 Probabilidades:</strong></div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:.9em;">
+            <span style="width:55px;">1 (${pred.prob1}%)</span><div class="prob-bar"><div class="prob-fill prob-home" style="width:${pred.prob1}%"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;font-size:.9em;">
+            <span style="width:55px;">X (${pred.probX}%)</span><div class="prob-bar"><div class="prob-fill prob-draw" style="width:${pred.probX}%"></div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:.9em;">
+            <span style="width:55px;">2 (${pred.prob2}%)</span><div class="prob-bar"><div class="prob-fill prob-away" style="width:${pred.prob2}%"></div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;text-align:center;font-size:.85em;">
+            <div style="background:rgba(255,255,255,.05);padding:6px;border-radius:6px;"><div style="color:#888;">Over 2.5</div><div style="font-weight:bold;color:#4ecca3;">${pred.over25}%</div></div>
+            <div style="background:rgba(255,255,255,.05);padding:6px;border-radius:6px;"><div style="color:#888;">Under 2.5</div><div style="font-weight:bold;color:#f9a825;">${pred.under25}%</div></div>
+            <div style="background:rgba(255,255,255,.05);padding:6px;border-radius:6px;"><div style="color:#888;">BTTS</div><div style="font-weight:bold;color:#e94560;">${pred.btts}%</div></div>
+        </div>`;
+}
+
+// ==================== ENTER RESULTS ====================
+function renderPendingMatches() {
+    const container = document.getElementById('pending-matches');
+    const pending = PARTIDOS.filter(p => !enteredResults.find(r => r.matchId === p.id));
+    if (pending.length === 0) {
+        container.innerHTML = '<p style="color:#4ecca3;text-align:center;padding:20px;">✅ Todos los partidos han sido ingresados</p>';
+        return;
+    }
+    let html = '';
+    pending.forEach(p => {
+        html += `
+            <div class="match-card" style="margin-bottom:8px;">
+                <div class="match-info">
+                    <span class="match-group">${p.grupo}</span>
+                    <span class="team-name team-home">${p.local}</span>
+                    <input type="number" class="result-input" id="lg-${p.id}" min="0" max="20" placeholder="0">
+                    <span class="vs">-</span>
+                    <input type="number" class="result-input" id="ag-${p.id}" min="0" max="20" placeholder="0">
+                    <span class="team-name team-away">${p.visitante}</span>
+                    <span class="match-date">${p.fecha}</span>
+                </div>
+                <button class="save-result-btn" onclick="saveResult(${p.id},'${p.local}','${p.visitante}')">💾 Guardar</button>
+            </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function saveResult(matchId, local, away) {
+    const lg = parseInt(document.getElementById(`lg-${matchId}`).value);
+    const ag = parseInt(document.getElementById(`ag-${matchId}`).value);
+    if (isNaN(lg) || isNaN(ag) || lg < 0 || ag < 0) {
+        alert('Ingresa marcadores válidos');
+        return;
+    }
+    enteredResults.push({ matchId, local, away, localGoals: lg, awayGoals: ag, date: new Date().toISOString() });
+    localStorage.setItem('wc2026_results', JSON.stringify(enteredResults));
+
+    // Recalculate
+    EQUIPOS = calculateAllStats();
+
+    const msg = document.getElementById('result-msg');
+    msg.style.display = 'block';
+    msg.innerHTML = `✅ <strong>${local} ${lg} - ${ag} ${away}</strong> guardado. xG recalculados para ambos equipos.`;
+    setTimeout(() => msg.style.display = 'none', 4000);
+
+    renderPendingMatches();
+    renderEnteredResults();
+    renderMatches();
+    renderStats();
+    populateSimSelects();
+}
+
+function renderEnteredResults() {
+    const container = document.getElementById('entered-results');
+    document.getElementById('results-count').textContent = `(${enteredResults.length} partidos)`;
+    if (enteredResults.length === 0) {
+        container.innerHTML = '<p style="color:#888;text-align:center;padding:15px;">No hay resultados ingresados aún</p>';
+        return;
+    }
+    let html = '';
+    enteredResults.slice().reverse().forEach((r, idx) => {
+        const realIdx = enteredResults.length - 1 - idx;
+        html += `
+            <div class="result-row">
+                <span style="min-width:40px;color:#888;font-size:.8em;">#${r.matchId}</span>
+                <span style="font-weight:bold;color:#4ecca3;">${r.local}</span>
+                <span class="score">${r.localGoals} - ${r.awayGoals}</span>
+                <span style="font-weight:bold;color:#f9a825;">${r.away}</span>
+                <span class="vs-small">(${new Date(r.date).toLocaleDateString()})</span>
+                <button class="delete-btn" onclick="deleteResult(${realIdx})">🗑️ Eliminar</button>
+            </div>`;
+    });
+    container.innerHTML = html;
+}
+
+function deleteResult(index) {
+    if (!confirm('¿Eliminar este resultado? Los xG se recalcularán.')) return;
+    enteredResults.splice(index, 1);
+    localStorage.setItem('wc2026_results', JSON.stringify(enteredResults));
+    EQUIPOS = calculateAllStats();
+    renderPendingMatches();
+    renderEnteredResults();
+    renderMatches();
+    renderStats();
+    populateSimSelects();
+    renderBracketGroups();
+}
+
+function forceRecalculate() {
+    EQUIPOS = calculateAllStats();
+    document.getElementById('recalc-msg').innerHTML = '<p style="color:#4ecca3;margin-top:10px;">✅ xG recalculados con ' + enteredResults.length + ' resultados del Mundial</p>';
+    renderStats();
+    renderMatches();
+}
+
+// ==================== GROUPS ====================
+function simularTodosGrupos() {
+    const simResults = {};
+    PARTIDOS.forEach(p => {
+        if (!enteredResults.find(r => r.matchId === p.id)) {
+            simResults[p.id] = simulateMatch(p.local, p.visitante);
+        }
+    });
+    renderGroups(simResults);
+}
+
+function resetGrupos() {
+    renderGroups({});
+}
+
+function renderGroups(simResults = {}) {
+    const container = document.getElementById('groups-container');
+    let html = '';
+    for (const [groupName, teams] of Object.entries(GRUPOS)) {
+        const standings = teams.map(t => ({ team: t, P: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0 }));
+        PARTIDOS.filter(p => p.grupo === groupName).forEach(p => {
+            let r = enteredResults.find(res => res.matchId === p.id);
+            if (!r && simResults[p.id]) {
+                const sr = simResults[p.id];
+                r = { localGoals: sr.localGoals, awayGoals: sr.awayGoals };
+            }
+            if (r) {
+                const ht = standings.find(s => s.team === p.local);
+                const at = standings.find(s => s.team === p.visitante);
+                ht.P++; at.P++;
+                ht.GF += r.localGoals; ht.GA += r.awayGoals;
+                at.GF += r.awayGoals; at.GA += r.localGoals;
+                ht.GD = ht.GF - ht.GA; at.GD = at.GF - at.GA;
+                if (r.localGoals > r.awayGoals) { ht.W++; ht.PTS += 3; at.L++; }
+                else if (r.localGoals < r.awayGoals) { at.W++; at.PTS += 3; ht.L++; }
+                else { ht.D++; at.D++; ht.PTS++; at.PTS++; }
+            }
+        });
+        standings.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+        html += `
+            <div class="card" style="margin-bottom:12px;">
+                <h3>Grupo ${groupName}</h3>
+                <table class="group-table">
+                    <thead><tr><th>#</th><th>Equipo</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>PTS</th></tr></thead>
+                    <tbody>
+                        ${standings.map((s, i) => `
+                            <tr style="${i < 2 ? 'background:rgba(78,204,163,.08);' : ''}">
+                                <td>${i + 1}</td><td><strong>${s.team}</strong></td>
+                                <td>${s.P}</td><td>${s.W}</td><td>${s.D}</td><td>${s.L}</td>
+                                <td>${s.GF}</td><td>${s.GA}</td><td>${s.GD > 0 ? '+' : ''}${s.GD}</td>
+                                <td><strong style="color:#4ecca3;">${s.PTS}</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>`;
+    }
+    container.innerHTML = html;
+}
+
+// ==================== SIMULATOR ====================
+function populateSimSelects() {
+    const localSel = document.getElementById('sim-local');
+    const awaySel = document.getElementById('sim-visitante');
+    const betMatch = document.getElementById('bet-match');
+    localSel.innerHTML = '<option value="">Local...</option>';
+    awaySel.innerHTML = '<option value="">Visitante...</option>';
+    betMatch.innerHTML = '<option value="">Seleccionar partido...</option>';
+
+    EQUIPOS.forEach(e => {
+        localSel.innerHTML += `<option value="${e.nombre}">${e.nombre}</option>`;
+        awaySel.innerHTML += `<option value="${e.nombre}">${e.nombre}</option>`;
+    });
+    PARTIDOS.forEach(p => {
+        betMatch.innerHTML += `<option value="${p.local} vs ${p.visitante}">${p.grupo}: ${p.local} vs ${p.visitante}</option>`;
+    });
+    document.getElementById('bet-date').value = new Date().toISOString().split('T')[0];
+}
+
+function simularPartido() {
+    const local = document.getElementById('sim-local').value;
+    const away = document.getElementById('sim-visitante').value;
+    const count = parseInt(document.getElementById('sim-count').value) || 1000;
+    if (!local || !away || local === away) { alert('Selecciona dos equipos diferentes'); return; }
+
+    const tLocal = getTeam(local), tAway = getTeam(away);
+    const localXG = (tLocal.home_xg + tAway.away_xga) / 2;
+    const awayXG = (tAway.away_xg + tLocal.home_xga) / 2;
+
+    let wins = 0, draws = 0, losses = 0, over25 = 0, under25 = 0, btts = 0;
+    let totalLG = 0, totalAG = 0;
+    const scoreDist = {};
+
+    for (let i = 0; i < count; i++) {
+        const lg = poisson(localXG), ag = poisson(awayXG);
+        totalLG += lg; totalAG += ag;
+        const score = `${lg}-${ag}`;
+        scoreDist[score] = (scoreDist[score] || 0) + 1;
+        if (lg > ag) wins++; else if (lg === ag) draws++; else losses++;
+        if (lg + ag > 2.5) over25++; else under25++;
+        if (lg > 0 && ag > 0) btts++;
+    }
+
+    const topScores = Object.entries(scoreDist).sort((a, b) => b[1] - a[1]).slice(0, 5)
+        .map(([s, c]) => ({ score: s, pct: (c / count * 100).toFixed(1) }));
+
+    document.getElementById('sim-result').innerHTML = `
+        <div class="card">
+            <h3>📊 ${count.toLocaleString()} simulaciones: ${local} vs ${away}</h3>
+            <div class="score-pred">
+                <span class="score-home">${local}</span> 
+                <span style="color:#888;">${(totalLG/count).toFixed(2)} - ${(totalAG/count).toFixed(2)}</span> 
+                <span class="score-away">${away}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin:8px 0;">
+                <span style="width:80px;">1 (${(wins/count*100).toFixed(1)}%)</span>
+                <div class="prob-bar" style="flex:1;"><div class="prob-fill prob-home" style="width:${wins/count*100}%"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin:8px 0;">
+                <span style="width:80px;">X (${(draws/count*100).toFixed(1)}%)</span>
+                <div class="prob-bar" style="flex:1;"><div class="prob-fill prob-draw" style="width:${draws/count*100}%"></div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;margin:8px 0;">
+                <span style="width:80px;">2 (${(losses/count*100).toFixed(1)}%)</span>
+                <div class="prob-bar" style="flex:1;"><div class="prob-fill prob-away" style="width:${losses/count*100}%"></div></div>
+            </div>
+            <div style="margin-top:12px;font-size:.9em;">
+                <strong>📈 Mercados:</strong> Over 2.5: <span style="color:#4ecca3;font-weight:bold;">${(over25/count*100).toFixed(1)}%</span> | 
+                Under 2.5: <span style="color:#f9a825;font-weight:bold;">${(under25/count*100).toFixed(1)}%</span> | 
+                BTTS: <span style="color:#e94560;font-weight:bold;">${(btts/count*100).toFixed(1)}%</span>
+            </div>
+            <div style="margin-top:12px;">
+                <strong>🎯 Resultados más probables:</strong>
+                <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+                    ${topScores.map(s => `<div style="background:rgba(255,255,255,.1);padding:6px 12px;border-radius:20px;font-size:.85em;"><strong>${s.score}</strong> (${s.pct}%)</div>`).join('')}
+                </div>
+            </div>
+        </div>`;
+}
+
+function simularTorneo() {
+    const count = parseInt(document.getElementById('tournament-sims').value) || 100;
+    const wins = {};
+    EQUIPOS.forEach(e => wins[e.nombre] = 0);
+
+    for (let sim = 0; sim < count; sim++) {
+        const groupResults = {};
+        for (const [gName, teams] of Object.entries(GRUPOS)) {
+            const standings = teams.map(t => ({ team: t, PTS: 0, GD: 0, GF: 0 }));
+            PARTIDOS.filter(p => p.grupo === gName).forEach(p => {
+                let r = enteredResults.find(res => res.matchId === p.id);
+                if (!r) { const sr = simulateMatch(p.local, p.visitante); r = { localGoals: sr.localGoals, awayGoals: sr.awayGoals }; }
+                const ht = standings.find(s => s.team === p.local);
+                const at = standings.find(s => s.team === p.visitante);
+                ht.GF += r.localGoals; ht.GD += r.localGoals - r.awayGoals;
+                at.GF += r.awayGoals; at.GD += r.awayGoals - r.localGoals;
+                if (r.localGoals > r.awayGoals) ht.PTS += 3;
+                else if (r.localGoals < r.awayGoals) at.PTS += 3;
+                else { ht.PTS++; at.PTS++; }
+            });
+            standings.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+            groupResults[gName] = standings.slice(0, 2).map(s => s.team);
+        }
+
+        let knockout = [];
+        for (const g of Object.keys(GRUPOS)) knockout.push(groupResults[g][0], groupResults[g][1]);
+
+        while (knockout.length > 1) {
+            const nextRound = [];
+            for (let i = 0; i < knockout.length; i += 2) {
+                if (i + 1 < knockout.length) {
+                    const r = simulateMatch(knockout[i], knockout[i+1]);
+                    nextRound.push(r.localGoals >= r.awayGoals ? knockout[i] : knockout[i+1]);
+                } else nextRound.push(knockout[i]);
+            }
+            knockout = nextRound;
+        }
+        if (knockout[0]) wins[knockout[0]]++;
+    }
+
+    const sorted = Object.entries(wins).filter(([_, c]) => c > 0).sort((a, b) => b[1] - a[1]);
+
+    document.getElementById('tournament-result').innerHTML = `
+        <div class="card">
+            <h3>🏆 Probabilidades de Ganar el Mundial (${count} simulaciones)</h3>
+            <div style="margin-top:12px;">
+                ${sorted.slice(0, 15).map(([team, w], i) => `
+                    <div style="display:flex;align-items:center;gap:10px;margin:6px 0;">
+                        <span style="width:30px;font-weight:bold;color:#e94560;">#${i+1}</span>
+                        <span style="width:150px;font-size:.9em;">${team}</span>
+                        <div class="prob-bar" style="flex:1;">
+                            <div class="prob-fill prob-home" style="width:${w/count*100}%;background:linear-gradient(90deg,#e94560,#ff6b6b);">
+                                ${(w/count*100).toFixed(1)}%
+                            </div>
+                        </div>
+                        <span style="width:50px;text-align:right;font-weight:bold;font-size:.9em;">${w}</span>
+                    </div>
+                `).join('')}
+            </div>
+        </div>`;
+}
+
+// ==================== STATS ====================
+function renderStats() {
+    const container = document.getElementById('stats-container');
+    const updated = enteredResults.length > 0 ? `(actualizado con ${enteredResults.length} resultados del Mundial)` : '(base: 4 partidos previos)';
+    document.getElementById('stats-updated').textContent = updated;
+
+    container.innerHTML = EQUIPOS.map(e => `
+        <div class="team-stat-card">
+            <h3>⚽ ${e.nombre} ${e.wc_home > 0 || e.wc_away > 0 ? '<span class="wc-badge">WC+' + (e.wc_home+e.wc_away) + '</span>' : ''}</h3>
+            <div class="stat-row"><span class="stat-label">🏠 xG (Local)</span><span class="stat-value">${e.home_xg}</span></div>
+            <div class="stat-row"><span class="stat-label">🏠 xGA (Local)</span><span class="stat-value">${e.home_xga}</span></div>
+            <div class="stat-row"><span class="stat-label">✈️ xG (Visitante)</span><span class="stat-value away">${e.away_xg}</span></div>
+            <div class="stat-row"><span class="stat-label">✈️ xGA (Visitante)</span><span class="stat-value away">${e.away_xga}</span></div>
+            <div class="stat-row" style="border-top:2px solid rgba(255,255,255,.1);margin-top:6px;padding-top:6px;">
+                <span class="stat-label">📊 Dif. Local</span>
+                <span class="stat-value">${(e.home_xg - e.home_xga).toFixed(2)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">📊 Dif. Visitante</span>
+                <span class="stat-value away">${(e.away_xg - e.away_xga).toFixed(2)}</span>
+            </div>
+            <div class="stat-row" style="font-size:.8em;color:#888;">
+                <span>Partidos: ${e.total_home}L / ${e.total_away}V</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ==================== BETTING ====================
+function updateBankroll() {
+    document.getElementById('bankroll').textContent = '$' + bankroll.toFixed(2);
+    localStorage.setItem('wc2026_bankroll', bankroll);
+}
+
+function setBankroll() {
+    const val = parseFloat(document.getElementById('bankroll-input').value);
+    if (val > 0) { bankroll = val; updateBankroll(); }
+}
+
+function saveBet() {
+    const date = document.getElementById('bet-date').value;
+    const match = document.getElementById('bet-match').value;
+    const pick = document.getElementById('bet-pick').value;
+    const odds = parseFloat(document.getElementById('bet-odds').value);
+    const stake = parseFloat(document.getElementById('bet-stake').value);
+    const result = document.getElementById('bet-result').value;
+
+    if (!date || !match || !pick || !odds || !stake || !result) { alert('Completa todos los campos'); return; }
+
+    let pl = 0;
+    if (result === 'hit') pl = stake * (odds - 1);
+    else if (result === 'miss') pl = -stake;
+
+    const bet = { id: Date.now(), date, match, pick, odds, stake, result, pl };
+    bets.push(bet);
+    if (result !== 'pending') bankroll += pl;
+
+    localStorage.setItem('wc2026_bets', JSON.stringify(bets));
+    updateBankroll(); renderHistory();
+
+    document.getElementById('bet-pick').value = '';
+    document.getElementById('bet-odds').value = '';
+    document.getElementById('bet-stake').value = '';
+    document.getElementById('bet-result').value = '';
+}
+
+function renderHistory() {
+    const tbody = document.getElementById('history-body');
+    tbody.innerHTML = bets.slice().reverse().map(b => `
+        <tr>
+            <td>${b.date}</td>
+            <td>${b.match}</td>
+            <td><strong>${b.pick}</strong></td>
+            <td>${b.odds}</td>
+            <td>$${b.stake.toFixed(2)}</td>
+            <td class="${b.result}">${b.result === 'hit' ? '✅' : b.result === 'miss' ? '❌' : '⏳'} ${b.result.toUpperCase()}</td>
+            <td class="${b.pl >= 0 ? 'profit' : 'loss'}">${b.pl >= 0 ? '+' : ''}$${b.pl.toFixed(2)}</td>
+        </tr>
+    `).join('');
+}
+
+function exportHistory() {
+    const csv = ['Fecha,Partido,Pick,Cuota,Stake,Resultado,P/L'];
+    bets.forEach(b => csv.push(`${b.date},${b.match},${b.pick},${b.odds},${b.stake},${b.result},${b.pl}`));
+    const blob = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'apuestas_mundial_2026.csv'; a.click();
+}
+
+function clearHistory() {
+    if (confirm('¿Borrar todo el historial?')) {
+        bets = []; bankroll = 1000;
+        localStorage.removeItem('wc2026_bets');
+        localStorage.removeItem('wc2026_bankroll');
+        updateBankroll(); renderHistory();
+    }
+}
+
+
+// ==================== BRACKET ====================
+function renderBracketGroups() {
+    const container = document.getElementById('bracket-groups-summary');
+    let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;">';
+
+    for (const [groupName, teams] of Object.entries(GRUPOS)) {
+        const standings = teams.map(t => ({ team: t, P: 0, W: 0, D: 0, L: 0, GF: 0, GA: 0, GD: 0, PTS: 0 }));
+        let hasResults = false;
+
+        PARTIDOS.filter(p => p.grupo === groupName).forEach(p => {
+            const r = enteredResults.find(res => res.matchId === p.id);
+            if (r) {
+                hasResults = true;
+                const ht = standings.find(s => s.team === p.local);
+                const at = standings.find(s => s.team === p.visitante);
+                ht.P++; at.P++;
+                ht.GF += r.localGoals; ht.GA += r.awayGoals;
+                at.GF += r.awayGoals; at.GA += r.localGoals;
+                ht.GD = ht.GF - ht.GA; at.GD = at.GF - at.GA;
+                if (r.localGoals > r.awayGoals) { ht.W++; ht.PTS += 3; at.L++; }
+                else if (r.localGoals < r.awayGoals) { at.W++; at.PTS += 3; ht.L++; }
+                else { ht.D++; at.D++; ht.PTS++; at.PTS++; }
+            }
+        });
+
+        standings.sort((a, b) => b.PTS - a.PTS || b.GD - a.GD || b.GF - a.GF);
+
+        html += `
+            <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:10px;border:1px solid rgba(255,255,255,.1);">
+                <div style="font-weight:bold;color:#e94560;margin-bottom:6px;">Grupo ${groupName}</div>
+                ${standings.map((s, i) => `
+                    <div style="display:flex;justify-content:space-between;padding:3px 0;font-size:.85em;">
+                        <span style="${i < 2 ? 'color:#4ecca3;font-weight:bold;' : 'color:#888;'}">${i+1}. ${s.team}</span>
+                        <span style="color:#888;">${s.PTS}pts</span>
+                    </div>
+                `).join('')}
+                ${!hasResults ? '<div style="color:#666;font-size:.8em;margin-top:5px;">Sin resultados aún</div>' : ''}
+            </div>
+        `;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', () => {
+    renderMatches();
+    renderPendingMatches();
+    renderEnteredResults();
+    renderGroups();
+    populateSimSelects();
+    renderStats();
+    updateBankroll();
+    renderHistory();
+    renderBracketGroups();
+});
+</script>
+</body>
+</html>
